@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, ShieldCheck, User } from 'lucide-react';
+import { Bell, ShieldCheck, User, Sparkles } from 'lucide-react';
 import { UserAccount } from '../types';
 import { LadTierBadge } from './LadTierBadge';
 
@@ -9,6 +9,7 @@ interface NavbarProps {
   unreadCount: number;
   onOpenNotifications: () => void;
   onOpenAuth: () => void;
+  onOpenBanterCoach?: () => void;
   user: UserAccount | null;
   isOnline: boolean;
 }
@@ -19,6 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount,
   onOpenNotifications,
   onOpenAuth,
+  onOpenBanterCoach,
   user,
 }) => {
   return (
@@ -101,6 +103,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Zone 3: 1-2 primary actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {onOpenBanterCoach && (
+            <button
+              onClick={onOpenBanterCoach}
+              className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/30 text-amber-400 hover:text-amber-300 text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title="Open AI Banter Coach"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span className="hidden sm:inline">Banter Coach</span>
+              <span className="text-[10px] font-mono bg-amber-500/20 px-1 rounded text-amber-300">AI</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenNotifications}
             aria-label="Open notifications"

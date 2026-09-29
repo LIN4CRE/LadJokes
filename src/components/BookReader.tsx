@@ -20,9 +20,11 @@ import {
   EyeOff,
   Filter,
   Zap,
+  Sparkles,
 } from 'lucide-react';
 import { Chapter, Joke, JokeCategoryType, ContentIntensity } from '../types';
 import { playBanterSound } from '../services/syncService';
+import { BanterCoachModal } from './BanterCoachModal';
 
 interface BookReaderProps {
   chapters: Chapter[];
@@ -53,6 +55,7 @@ export const BookReader: React.FC<BookReaderProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isReadingAudio, setIsReadingAudio] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [isCoachOpen, setIsCoachOpen] = useState(false);
   const [showPunchline, setShowPunchline] = useState(true);
 
   // New Joke form state
@@ -685,7 +688,17 @@ export const BookReader: React.FC<BookReaderProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">The Killer Punchline</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-slate-400">The Killer Punchline</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsCoachOpen(true)}
+                    className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-all cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 py-1 px-2.5 rounded-lg border border-amber-500/30"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>✨ AI Punchline Coach</span>
+                  </button>
+                </div>
                 <input
                   type="text"
                   placeholder="The final punchline..."
@@ -726,6 +739,15 @@ export const BookReader: React.FC<BookReaderProps> = ({
           </div>
         </div>
       )}
+
+      {/* AI Banter Coach for Punchlines */}
+      <BanterCoachModal
+        isOpen={isCoachOpen}
+        onClose={() => setIsCoachOpen(false)}
+        initialMode="punchline"
+        initialContext={newContent ? `Setup: ${newContent}` : newTitle || 'A hilarious pub setup'}
+        onApplyText={(suggestedPunchline) => setNewPunchline(suggestedPunchline)}
+      />
     </div>
   );
 };

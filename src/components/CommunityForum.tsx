@@ -15,10 +15,14 @@ import {
   Sparkles,
   HelpCircle,
   Zap,
+  Volume2,
+  Headphones,
 } from 'lucide-react';
 import { CommunityStory, OutrageType, Comment, DailyBanterPrompt, LadTier } from '../types';
 import { playBanterSound } from '../services/syncService';
 import { LadTierBadge } from './LadTierBadge';
+import { BanterCoachModal } from './BanterCoachModal';
+import { StoryAudioPlayerModal } from './StoryAudioPlayerModal';
 
 interface CommunityForumProps {
   stories: CommunityStory[];
@@ -110,6 +114,17 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
     ],
   });
   const [newCommentText, setNewCommentText] = useState('');
+  const [coachModalConfig, setCoachModalConfig] = useState<{
+    isOpen: boolean;
+    mode: 'punchline' | 'witty_response' | 'story_polish' | 'chat';
+    context: string;
+    onApply?: (text: string) => void;
+  }>({
+    isOpen: false,
+    mode: 'story_polish',
+    context: '',
+  });
+  const [storyForAudio, setStoryForAudio] = useState<CommunityStory | null>(null);
 
   // Categories list
   const categories = ['All', 'Stag Do', 'Pub Tales', 'Dating Fails', 'Sunday League', 'Workplace', 'Hangover Horror'];
@@ -619,13 +634,28 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => onShareStory(story)}
-                  className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
-                >
-                  <Share2 className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Share Story</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setStoryForAudio(story);
+                      playBanterSound('pint');
+                    }}
+                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-gradient-to-r from-amber-500/15 via-orange-500/15 to-amber-500/15 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/30 text-amber-400 hover:text-amber-300 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                    title="Listen to story with Pub Tale experimental audio"
+                  >
+                    <Volume2 className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                    <span>Listen to Story</span>
+                    <span className="text-[10px] font-mono px-1 rounded bg-amber-500/20 text-amber-300">TTS</span>
+                  </button>
+
+                  <button
+                    onClick={() => onShareStory(story)}
+                    className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Share Story</span>
+                  </button>
+                </div>
               </div>
             </article>
           );
@@ -749,7 +779,26 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Your Full Story</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-medium text-slate-400">Your Full Story</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCoachModalConfig({
+                        isOpen: true,
+                        mode: 'story_polish',
+                        context: newContent ? `Title: ${newTitle}\nDraft: ${newContent}` : newTitle || 'An outrageous pub disaster tale',
+                        onApply: (suggestedText) => {
+                          setNewContent((prev) => (prev ? prev + '\n\n' + suggestedText : suggestedText));
+                        },
+                      });
+                    }}
+                    className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-all cursor-pointer bg-amber-500/10 hover:bg-amber-500/20 py-1 px-2.5 rounded-lg border border-amber-500/30"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>✨ Ask Banter Coach (AI)</span>
+                  </button>
+                </div>
                 <textarea
                   rows={5}
                   placeholder="Don't spare any awkward details. Tell us what happened..."
@@ -796,12 +845,25 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
                 </div>
                 <span className="text-xs text-slate-400">Community Discussion & Banter</span>
               </div>
-              <button
-                onClick={() => setActiveStoryForComments(null)}
-                className="text-slate-400 hover:text-white p-1 cursor-pointer"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setStoryForAudio(activeStoryForComments);
+                    playBanterSound('pint');
+                  }}
+                  className="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:text-amber-300 text-xs font-bold transition-all cursor-pointer"
+                  title="Listen to this story"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Listen</span>
+                </button>
+                <button
+                  onClick={() => setActiveStoryForComments(null)}
+                  className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Comment list */}
@@ -828,10 +890,27 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
             </div>
 
             {/* Post comment input */}
-            <form onSubmit={handleAddComment} className="pt-3 border-t border-white/5 flex gap-2">
+            <form onSubmit={handleAddComment} className="pt-3 border-t border-white/5 flex gap-2 items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setCoachModalConfig({
+                    isOpen: true,
+                    mode: 'witty_response',
+                    context: `Story title: ${activeStoryForComments.title}\nStory content: ${activeStoryForComments.content}`,
+                    onApply: (suggestedText) => {
+                      setNewCommentText(suggestedText);
+                    },
+                  });
+                }}
+                title="Ask Banter Coach for a Witty Comeback"
+                className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
               <input
                 type="text"
-                placeholder="Drop your banter retort..."
+                placeholder="Drop your banter retort (or click ✨ for Banter Coach)..."
                 value={newCommentText}
                 onChange={(e) => setNewCommentText(e.target.value)}
                 className="flex-1 bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
@@ -847,6 +926,21 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
           </div>
         </div>
       )}
+      {/* AI Banter Coach Modal */}
+      <BanterCoachModal
+        isOpen={coachModalConfig.isOpen}
+        onClose={() => setCoachModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        initialMode={coachModalConfig.mode}
+        initialContext={coachModalConfig.context}
+        onApplyText={coachModalConfig.onApply}
+      />
+
+      {/* Experimental Pub Tale Text-to-Speech Player Modal */}
+      <StoryAudioPlayerModal
+        story={storyForAudio}
+        isOpen={!!storyForAudio}
+        onClose={() => setStoryForAudio(null)}
+      />
     </div>
   );
 };

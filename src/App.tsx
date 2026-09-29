@@ -18,6 +18,7 @@ import {
   Sun,
   Shield,
   Smile,
+  Sparkles,
 } from 'lucide-react';
 
 import {
@@ -65,10 +66,14 @@ import { BiometricAuthModal } from './components/BiometricAuthModal';
 import { SocialShareModal } from './components/SocialShareModal';
 import { NotificationCenter } from './components/NotificationCenter';
 import { AgeDisclaimerModal } from './components/AgeDisclaimerModal';
+import { BanterCoachModal } from './components/BanterCoachModal';
 
 export default function App() {
   // Navigation
   const [currentTab, setCurrentTab] = useState<'dadJokes' | 'book' | 'community' | 'polls' | 'lounge' | 'admin'>('dadJokes');
+
+  // AI Banter Coach state
+  const [isBanterCoachOpen, setIsBanterCoachOpen] = useState(false);
 
   // Network offline state
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -456,6 +461,7 @@ export default function App() {
         unreadCount={unreadCount}
         onOpenNotifications={() => setIsNotifOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenBanterCoach={() => setIsBanterCoachOpen(true)}
         user={currentUser}
         isOnline={isOnline}
       />
@@ -650,6 +656,25 @@ export default function App() {
         title={shareData.title}
         content={shareData.content}
         type={shareData.type}
+      />
+
+      {/* Floating Banter Coach Quick Trigger */}
+      <button
+        onClick={() => {
+          setIsBanterCoachOpen(true);
+          playBanterSound('pop');
+        }}
+        className="fixed bottom-6 right-6 z-30 hidden md:flex items-center gap-2.5 py-3 px-5 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs uppercase tracking-wider transition-all shadow-xl shadow-amber-500/25 hover:scale-105 active:scale-95 cursor-pointer border border-amber-300/40"
+        title="Ask Baz The AI Banter Coach"
+      >
+        <Sparkles className="w-4 h-4 text-black animate-pulse" />
+        <span>Banter Coach AI</span>
+      </button>
+
+      {/* Global Banter Coach Modal */}
+      <BanterCoachModal
+        isOpen={isBanterCoachOpen}
+        onClose={() => setIsBanterCoachOpen(false)}
       />
     </div>
   );
