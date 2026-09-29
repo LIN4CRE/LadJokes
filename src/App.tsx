@@ -30,6 +30,7 @@ import {
   FlaggedItem,
   AppNotification,
   OutrageType,
+  DailyBanterPrompt,
 } from './types';
 
 import {
@@ -40,7 +41,10 @@ import {
   INITIAL_USER,
   INITIAL_TASKS,
   INITIAL_FLAGGED,
+  INITIAL_DAILY_PROMPTS,
 } from './data/initialData';
+
+import { calculateLadTier } from './services/tierService';
 
 import {
   broadcastSync,
@@ -74,14 +78,16 @@ export default function App() {
   const [chapters] = useState<Chapter[]>(INITIAL_CHAPTERS);
 
   const [jokes, setJokes] = useState<Joke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_book_items');
+    const saved = localStorage.getItem('lad_jokes_book_items_v4');
     return saved ? JSON.parse(saved) : INITIAL_JOKES;
   });
 
   const [stories, setStories] = useState<CommunityStory[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_community_stories');
+    const saved = localStorage.getItem('lad_jokes_community_stories_v2');
     return saved ? JSON.parse(saved) : INITIAL_STORIES;
   });
+
+  const [dailyPrompts, setDailyPrompts] = useState<DailyBanterPrompt[]>(INITIAL_DAILY_PROMPTS);
 
   const [polls, setPolls] = useState<Poll[]>(() => {
     const saved = localStorage.getItem('lad_jokes_polls');
@@ -153,11 +159,11 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('lad_jokes_book_items', JSON.stringify(jokes));
+    localStorage.setItem('lad_jokes_book_items_v4', JSON.stringify(jokes));
   }, [jokes]);
 
   useEffect(() => {
-    localStorage.setItem('lad_jokes_community_stories', JSON.stringify(stories));
+    localStorage.setItem('lad_jokes_community_stories_v2', JSON.stringify(stories));
   }, [stories]);
 
   useEffect(() => {
@@ -233,6 +239,17 @@ export default function App() {
     setJokes((prev) =>
       prev.map((j) => (j.id === jokeId ? { ...j, pintsSpilled: j.pintsSpilled + 1 } : j))
     );
+
+    // Increment user pints and recalculate Lad Tier
+    if (currentUser) {
+      const newPints = currentUser.pintsBought + 1;
+      const { tier: newTier } = calculateLadTier(newPints, currentUser.karma);
+      setCurrentUser({
+        ...currentUser,
+        pintsBought: newPints,
+        tier: newTier,
+      });
+    }
   };
 
   const handleBookmarkJoke = (jokeId: string) => {
@@ -301,6 +318,7 @@ export default function App() {
       id: 'story-' + Date.now(),
       author: storyData.author || 'AnonymousLad',
       authorBadge: storyData.authorBadge || 'Rookie Contributor',
+      authorTier: storyData.authorTier || (currentUser?.tier || 'Rookie Lad'),
       avatar: storyData.avatar || '🍺',
       title: storyData.title || '',
       category: storyData.category || 'Pub Tales',
@@ -313,13 +331,33 @@ export default function App() {
       },
       commentsCount: 0,
       createdAt: 'Just now',
-      verifiedLad: true,
+      verifiedLad: !storyData.isGhostMode,
+      isGhostMode: storyData.isGhostMode,
+      isDailyPromptEntry: storyData.isDailyPromptEntry,
       views: 1,
       engagementScore: 10,
     };
 
     setStories((prev) => [newStory, ...prev]);
     broadcastSync('NEW_STORY_POSTED', newStory);
+
+    // If attached to daily prompt, increment entries count
+    if (storyData.isDailyPromptEntry) {
+      setDailyPrompts((prev) =>
+        prev.map((dp, i) => (i === 0 ? { ...dp, entriesCount: dp.entriesCount + 1 } : dp))
+      );
+    }
+
+    // Reward user karma and level up tier
+    if (currentUser && !storyData.isGhostMode) {
+      const newKarma = currentUser.karma + 25;
+      const { tier: newTier } = calculateLadTier(currentUser.pintsBought, newKarma);
+      setCurrentUser({
+        ...currentUser,
+        karma: newKarma,
+        tier: newTier,
+      });
+    }
   };
 
   // Handlers for Polls
@@ -444,6 +482,8 @@ export default function App() {
         {currentTab === 'community' && (
           <CommunityForum
             stories={stories}
+            dailyPrompts={dailyPrompts}
+            currentUserTier={currentUser?.tier}
             onRateOutrage={handleRateOutrage}
             onShareStory={(story) =>
               setShareData({

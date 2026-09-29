@@ -28,10 +28,19 @@ export interface OutrageRatings {
   nuclearOutrage: number;
 }
 
+export type LadTier =
+  | 'Rookie Lad'
+  | 'Banter Apprentice'
+  | 'Banter Veteran'
+  | 'Meme Lord'
+  | 'Pub Legend'
+  | 'Immortal Weapon';
+
 export interface CommunityStory {
   id: string;
   author: string;
   authorBadge: string;
+  authorTier?: LadTier;
   avatar: string;
   title: string;
   category: 'Stag Do' | 'Pub Tales' | 'Dating Fails' | 'Sunday League' | 'Workplace' | 'Hangover Horror';
@@ -44,16 +53,30 @@ export interface CommunityStory {
   bookmarked?: boolean;
   views: number;
   engagementScore: number;
+  isDailyPromptEntry?: boolean;
+  isGhostMode?: boolean;
 }
 
 export interface Comment {
   id: string;
   storyId: string;
   author: string;
+  authorTier?: LadTier;
   avatar: string;
   text: string;
   createdAt: string;
   likes: number;
+  isGhostMode?: boolean;
+}
+
+export interface DailyBanterPrompt {
+  id: string;
+  topic: string;
+  description: string;
+  date: string;
+  expiresIn: string;
+  entriesCount: number;
+  topEntryId?: string;
 }
 
 export interface PollOption {
@@ -77,6 +100,7 @@ export interface Poll {
 export interface EncryptedMessage {
   id: string;
   sender: string;
+  senderTier?: LadTier;
   recipient: string; // 'backroom_lounge' or username
   isGroup: boolean;
   ciphertext: string;
@@ -92,6 +116,7 @@ export interface UserAccount {
   email: string;
   avatar: string;
   role: 'member' | 'moderator' | 'admin';
+  tier: LadTier;
   biometricRegistered: boolean;
   karma: number;
   pintsBought: number;

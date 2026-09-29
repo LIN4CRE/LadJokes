@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { X, Fingerprint, Lock, ShieldCheck, Mail, Key, User, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, Fingerprint, Lock, ShieldCheck, Mail, Key, User, Sparkles, CheckCircle2, Award } from 'lucide-react';
 import { UserAccount } from '../types';
 import { generateBiometricHash } from '../services/cryptoService';
 import { playBanterSound } from '../services/syncService';
+import { LadTierBadge } from './LadTierBadge';
+import { calculateLadTier } from '../services/tierService';
 
 interface BiometricAuthModalProps {
   isOpen: boolean;
@@ -54,6 +56,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
             email: email || currentUser?.email || 'dlinacre16@gmail.com',
             avatar: '🍺',
             role: 'admin',
+            tier: 'Pub Legend',
             biometricRegistered: true,
             karma: 1580,
             pintsBought: 92,
@@ -76,6 +79,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
             email: 'dlinacre16@gmail.com',
             avatar: '🍺',
             role: 'admin',
+            tier: 'Pub Legend',
             biometricRegistered: true,
             karma: 1420,
             pintsBought: 84,
@@ -106,6 +110,7 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
       email,
       avatar: '🍺',
       role: email.includes('admin') || email.includes('dlinacre16') ? 'admin' : 'member',
+      tier: 'Banter Veteran',
       biometricRegistered: true,
       karma: 950,
       pintsBought: 42,
@@ -140,12 +145,13 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
           /* Profile & Security State */
           <div className="mt-5 space-y-5">
             <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl shrink-0">
                 {currentUser.avatar}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h4 className="text-base font-bold text-white truncate">{currentUser.nickname}</h4>
+                  <LadTierBadge tier={currentUser.tier || 'Pub Legend'} size="sm" />
                   <span className="text-[10px] font-mono uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded">
                     {currentUser.role}
                   </span>
@@ -154,10 +160,50 @@ export const BiometricAuthModal: React.FC<BiometricAuthModalProps> = ({
                 <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-400 font-mono">
                   <span>Karma: <strong className="text-amber-400">{currentUser.karma}</strong></span>
                   <span>·</span>
-                  <span>Pints: <strong className="text-amber-400">{currentUser.pintsBought}</strong></span>
+                  <span>Pints Spilled: <strong className="text-amber-400">{currentUser.pintsBought}</strong></span>
                 </div>
               </div>
             </div>
+
+            {/* Lad Tier Progression Card */}
+            {(() => {
+              const tierInfo = calculateLadTier(currentUser.pintsBought, currentUser.karma);
+              return (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-[#171924] to-[#12141d] border border-amber-500/30 space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-amber-400 font-bold font-mono uppercase">
+                      <Award className="w-4 h-4" />
+                      <span>Lad Tier Rank: {tierInfo.tier}</span>
+                    </div>
+                    {tierInfo.nextTier && (
+                      <span className="text-[11px] font-mono text-slate-400">
+                        Next: <strong className="text-white">{tierInfo.nextTier}</strong>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-300 italic">{tierInfo.tagline}</p>
+                  
+                  {tierInfo.nextTier ? (
+                    <div>
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
+                        <span>Progress to next rank</span>
+                        <span>{tierInfo.pointsToNext} points needed</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500"
+                          style={{ width: `${tierInfo.progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[11px] font-mono text-emerald-400 font-bold">
+                      ⚡ MAXIMUM LAD TIER ACHIEVED (Legendary)
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             <div className="p-4 rounded-xl bg-[#090a0f] border border-emerald-500/20 space-y-2">
               <div className="flex items-center justify-between text-xs">

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bell, ShieldCheck, User } from 'lucide-react';
 import { UserAccount } from '../types';
+import { LadTierBadge } from './LadTierBadge';
 
 interface NavbarProps {
   currentTab: string;
@@ -106,13 +107,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-200 hover:text-white transition-colors cursor-pointer whitespace-nowrap"
           >
             {user?.biometricRegistered ? (
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             ) : (
-              <User className="w-4 h-4 text-amber-400" />
+              <User className="w-4 h-4 text-amber-400 shrink-0" />
             )}
             <span className="hidden sm:inline font-mono">
               {user ? user.nickname : 'Sign In'}
             </span>
+            {user && (
+              <span className="hidden md:inline">
+                <LadTierBadge tier={user.tier || 'Pub Legend'} size="sm" />
+              </span>
+            )}
           </button>
         </div>
       </div>

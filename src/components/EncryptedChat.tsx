@@ -14,6 +14,7 @@ import {
 import { EncryptedMessage, UserAccount } from '../types';
 import { encryptText, decryptText } from '../services/cryptoService';
 import { playBanterSound } from '../services/syncService';
+import { LadTierBadge } from './LadTierBadge';
 
 interface EncryptedChatProps {
   currentUser: UserAccount | null;
@@ -72,6 +73,7 @@ export const EncryptedChat: React.FC<EncryptedChatProps> = ({
     const message: EncryptedMessage = {
       id: 'msg-' + Date.now(),
       sender: senderName,
+      senderTier: currentUser?.tier || 'Pub Legend',
       recipient: activeChannel === 'lounge' ? 'backroom_lounge' : activeChannel,
       isGroup: activeChannel === 'lounge',
       ciphertext,
@@ -234,8 +236,9 @@ export const EncryptedChat: React.FC<EncryptedChatProps> = ({
                     key={msg.id}
                     className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                   >
-                    <div className="flex items-center gap-2 text-[11px] text-slate-500 mb-1 px-1">
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500 mb-1 px-1 flex-wrap">
                       <span className="font-bold text-slate-300">{msg.sender}</span>
+                      <LadTierBadge tier={msg.senderTier || 'Banter Veteran'} size="sm" />
                       <span>·</span>
                       <span className="font-mono">{msg.timestamp}</span>
                       {msg.ephemeralSeconds && (
