@@ -17,6 +17,10 @@ import {
   Zap,
   Volume2,
   Headphones,
+  Calendar,
+  Award,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { CommunityStory, OutrageType, Comment, DailyBanterPrompt, LadTier } from '../types';
 import { playBanterSound } from '../services/syncService';
@@ -125,11 +129,53 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
     context: '',
   });
   const [storyForAudio, setStoryForAudio] = useState<CommunityStory | null>(null);
+  const [promptViewTab, setPromptViewTab] = useState<'today' | 'archive'>('today');
+  const [archiveSearch, setArchiveSearch] = useState('');
+  const [expandedArchiveIds, setExpandedArchiveIds] = useState<Record<string, boolean>>({});
 
   // Categories list
   const categories = ['All', 'Stag Do', 'Pub Tales', 'Dating Fails', 'Sunday League', 'Workplace', 'Hangover Horror'];
 
   const activePrompt = dailyPrompts[0];
+  const archivePrompts = dailyPrompts.filter((p) => p.id !== 'prompt-today');
+
+  const filteredArchivePrompts = archivePrompts.filter((p) => {
+    if (!archiveSearch.trim()) return true;
+    const query = archiveSearch.toLowerCase();
+    return (
+      p.topic.toLowerCase().includes(query) ||
+      p.description.toLowerCase().includes(query) ||
+      (p.winnerTitle && p.winnerTitle.toLowerCase().includes(query)) ||
+      (p.winnerAuthor && p.winnerAuthor.toLowerCase().includes(query)) ||
+      (p.winnerContent && p.winnerContent.toLowerCase().includes(query))
+    );
+  });
+
+  const handleListenToArchiveWinner = (p: DailyBanterPrompt) => {
+    const syntheticStory: CommunityStory = {
+      id: `archive-${p.id}`,
+      author: p.winnerAuthor || 'Anonymous Winner',
+      authorBadge: 'Archive Champion',
+      authorTier: p.winnerAuthorTier || 'Pub Legend',
+      avatar: p.winnerAvatar || '🏆',
+      title: p.winnerTitle || p.topic,
+      category: 'Pub Tales',
+      content: p.winnerContent || p.description,
+      outrageRatings: {
+        properBanter: Math.round((p.winnerOutrageScore || 90) * 3),
+        absoluteWeapon: Math.round((p.winnerOutrageScore || 90) * 1.5),
+        spilledPint: p.winnerPints || 650,
+        nuclearOutrage: Math.round((p.winnerOutrageScore || 90) * 0.8),
+      },
+      commentsCount: p.entriesCount,
+      createdAt: p.date,
+      verifiedLad: true,
+      views: 4500,
+      engagementScore: 100,
+    };
+    setStoryForAudio(syntheticStory);
+    playBanterSound('pint');
+  };
 
   // Determine the Top Entry of the Day
   const topDailyEntry = stories.find((s) => s.id === activePrompt?.topEntryId) ||
@@ -281,98 +327,291 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
         </div>
       </div>
 
-      {/* DAILY BANTER PROMPT & TOP ENTRY SPOTLIGHT */}
+      {/* DAILY BANTER PROMPT & WEEKLY ARCHIVE */}
       {activePrompt && (
-        <div className="relative rounded-2xl bg-gradient-to-br from-[#1c1710] via-[#151722] to-[#10121a] border border-amber-500/30 p-6 shadow-2xl overflow-hidden">
+        <div className="relative rounded-2xl bg-gradient-to-br from-[#1c1710] via-[#151722] to-[#10121a] border border-amber-500/30 p-5 sm:p-6 shadow-2xl overflow-hidden">
           {/* Subtle amber aura in corner */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-5">
-            {/* Prompt Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-500/20">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                  <Zap className="w-5 h-5 animate-pulse" />
-                </span>
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
-                    <span>{activePrompt.date}</span>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-slate-400 font-normal">{activePrompt.expiresIn}</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-heading text-white">
-                    {activePrompt.topic}
-                  </h3>
-                </div>
-              </div>
+          {/* Sub-Tabs: Today's Live Prompt vs Weekly Archive */}
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPromptViewTab('today')}
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  promptViewTab === 'today'
+                    ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-white bg-white/5'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>Today's Live Prompt</span>
+              </button>
 
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-mono text-slate-400">
-                  <strong className="text-amber-400">{activePrompt.entriesCount}</strong> Lads Participated
+              <button
+                onClick={() => setPromptViewTab('archive')}
+                className={`flex items-center gap-2 py-2 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  promptViewTab === 'archive'
+                    ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+                    : 'text-slate-400 hover:text-white bg-white/5'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Weekly Archive (Past 7 Days)</span>
+                <span className="text-[10px] font-mono py-0.5 px-2 rounded-full bg-amber-500/20 text-amber-300">
+                  {archivePrompts.length} Days
                 </span>
-                <button
-                  onClick={() => {
-                    setIsDailyPromptEntry(true);
-                    setShowPostModal(true);
-                  }}
-                  className="py-1.5 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  Submit Entry
-                </button>
-              </div>
+              </button>
             </div>
 
-            {/* Prompt Description */}
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
-              {activePrompt.description}
-            </p>
-
-            {/* TOP ENTRY HIGHLIGHT SECTION */}
-            {topDailyEntry && (
-              <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#181a26] to-[#12141c] border border-amber-500/40 relative">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-xs font-bold font-mono text-amber-400 uppercase tracking-wider">
-                    <Trophy className="w-4 h-4 text-amber-400" />
-                    <span>TOP ENTRY OF THE DAY · CROWN OF BANTER</span>
-                  </div>
-                  <span className="text-[11px] font-mono text-amber-400 font-semibold bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded">
-                    🍺 {topDailyEntry.outrageRatings.spilledPint} Pints Spilled
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-white">{topDailyEntry.author}</span>
-                    <LadTierBadge tier={topDailyEntry.authorTier || 'Pub Legend'} size="sm" />
-                    <span className="text-[11px] text-slate-500 font-mono">· {topDailyEntry.createdAt}</span>
-                  </div>
-
-                  <h4 className="text-base font-bold text-amber-300 leading-snug">
-                    "{topDailyEntry.title}"
-                  </h4>
-
-                  <p className="text-xs sm:text-sm text-slate-200 line-clamp-3 leading-relaxed">
-                    {topDailyEntry.content}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-2 text-xs">
-                    <div className="flex items-center gap-3 text-slate-400 font-mono text-[11px]">
-                      <span>Outrage: <strong className="text-red-400">{calculateOutragePercent(topDailyEntry.outrageRatings)}%</strong></span>
-                      <span>·</span>
-                      <span>Comments: <strong className="text-slate-200">{topDailyEntry.commentsCount}</strong></span>
-                    </div>
-
-                    <button
-                      onClick={() => setActiveStoryForComments(topDailyEntry)}
-                      className="text-amber-400 hover:text-amber-300 font-semibold text-xs hover:underline cursor-pointer"
-                    >
-                      View Full Banter & Comments →
-                    </button>
-                  </div>
-                </div>
+            {promptViewTab === 'archive' && (
+              <div className="relative w-full sm:w-64">
+                <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search past winners & topics..."
+                  value={archiveSearch}
+                  onChange={(e) => setArchiveSearch(e.target.value)}
+                  className="w-full bg-[#13151f] border border-white/10 rounded-xl py-1.5 pl-8 pr-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                />
               </div>
             )}
           </div>
+
+          {/* TAB 1: TODAY'S LIVE PROMPT */}
+          {promptViewTab === 'today' && (
+            <div className="relative z-10 space-y-5 animate-in fade-in duration-200">
+              {/* Prompt Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-500/20">
+                <div className="flex items-center gap-2.5">
+                  <span className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                    <Zap className="w-5 h-5 animate-pulse" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
+                      <span>{activePrompt.date}</span>
+                      <span aria-hidden="true">·</span>
+                      <span className="text-slate-400 font-normal">{activePrompt.expiresIn}</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold font-heading text-white">
+                      {activePrompt.topic}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono text-slate-400">
+                    <strong className="text-amber-400">{activePrompt.entriesCount}</strong> Lads Participated
+                  </span>
+                  <button
+                    onClick={() => {
+                      setIsDailyPromptEntry(true);
+                      setShowPostModal(true);
+                    }}
+                    className="py-1.5 px-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-md shadow-amber-500/20"
+                  >
+                    Submit Entry
+                  </button>
+                </div>
+              </div>
+
+              {/* Prompt Description */}
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-3xl">
+                {activePrompt.description}
+              </p>
+
+              {/* TOP ENTRY HIGHLIGHT SECTION */}
+              {topDailyEntry && (
+                <div className="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#181a26] to-[#12141c] border border-amber-500/40 relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-xs font-bold font-mono text-amber-400 uppercase tracking-wider">
+                      <Trophy className="w-4 h-4 text-amber-400" />
+                      <span>TOP ENTRY OF THE DAY · CROWN OF BANTER</span>
+                    </div>
+                    <span className="text-[11px] font-mono text-amber-400 font-semibold bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded">
+                      🍺 {topDailyEntry.outrageRatings.spilledPint} Pints Spilled
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-bold text-white">{topDailyEntry.author}</span>
+                      <LadTierBadge tier={topDailyEntry.authorTier || 'Pub Legend'} size="sm" />
+                      <span className="text-[11px] text-slate-500 font-mono">· {topDailyEntry.createdAt}</span>
+                    </div>
+
+                    <h4 className="text-base font-bold text-amber-300 leading-snug">
+                      "{topDailyEntry.title}"
+                    </h4>
+
+                    <p className="text-xs sm:text-sm text-slate-200 line-clamp-3 leading-relaxed">
+                      {topDailyEntry.content}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 text-xs">
+                      <div className="flex items-center gap-3 text-slate-400 font-mono text-[11px]">
+                        <span>Outrage: <strong className="text-red-400">{calculateOutragePercent(topDailyEntry.outrageRatings)}%</strong></span>
+                        <span>·</span>
+                        <span>Comments: <strong className="text-slate-200">{topDailyEntry.commentsCount}</strong></span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            setStoryForAudio(topDailyEntry);
+                            playBanterSound('pint');
+                          }}
+                          className="flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Listen (TTS)</span>
+                        </button>
+
+                        <button
+                          onClick={() => setActiveStoryForComments(topDailyEntry)}
+                          className="text-amber-400 hover:text-amber-300 font-semibold text-xs hover:underline cursor-pointer"
+                        >
+                          View Full Banter & Comments →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 2: WEEKLY ARCHIVE (PAST 7 DAYS) */}
+          {promptViewTab === 'archive' && (
+            <div className="relative z-10 space-y-4 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-base sm:text-lg font-bold text-white font-heading flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-amber-400" />
+                    <span>Hall of Banter Champions · Past 7 Days</span>
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    Crowned winning entries voted the most outrageous by the pub community.
+                  </p>
+                </div>
+                <span className="hidden sm:inline text-xs font-mono text-amber-400/80 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20">
+                  7 Winning Stories Archived
+                </span>
+              </div>
+
+              {filteredArchivePrompts.length === 0 ? (
+                <div className="text-center py-10 text-xs text-slate-500 bg-white/5 rounded-2xl border border-white/5">
+                  No archived prompts match your search query.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {filteredArchivePrompts.map((p) => {
+                    const isExpanded = !!expandedArchiveIds[p.id];
+                    return (
+                      <div
+                        key={p.id}
+                        className="bg-[#13151f] border border-amber-500/20 hover:border-amber-500/40 rounded-2xl p-4 sm:p-5 space-y-3 transition-all shadow-md"
+                      >
+                        {/* Day Tag & Topic */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-white/5 gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="py-0.5 px-2.5 rounded-lg bg-amber-500/20 border border-amber-500/35 text-amber-300 font-mono text-xs font-bold">
+                              {p.dayLabel || p.date}
+                            </span>
+                            <span className="text-xs font-mono text-slate-400">
+                              · {p.entriesCount} Lads Competed
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                              🏆 Crowned Winner
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Prompt Topic Recap */}
+                        <div className="space-y-1">
+                          <h5 className="text-sm font-bold text-slate-300 font-sans">
+                            Prompt Challenge: <span className="text-white font-semibold font-heading">"{p.topic}"</span>
+                          </h5>
+                          <p className="text-xs text-slate-400 italic">
+                            {p.description}
+                          </p>
+                        </div>
+
+                        {/* Winner Showcase Card */}
+                        {p.winnerTitle && (
+                          <div className="rounded-xl bg-gradient-to-r from-amber-500/10 via-[#181a26] to-[#12141c] border border-amber-500/30 p-3.5 sm:p-4 space-y-2">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-base">{p.winnerAvatar || '🏆'}</span>
+                                <span className="text-xs font-bold text-white">{p.winnerAuthor}</span>
+                                {p.winnerAuthorTier && (
+                                  <LadTierBadge tier={p.winnerAuthorTier} size="sm" />
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-2 text-[11px] font-mono">
+                                <span className="text-amber-400 bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded font-semibold">
+                                  🍺 {p.winnerPints || 650} Pints
+                                </span>
+                                <span className="text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded font-semibold">
+                                  💥 {p.winnerOutrageScore || 90}% Outrage
+                                </span>
+                              </div>
+                            </div>
+
+                            <h6 className="text-sm font-bold text-amber-300">
+                              "{p.winnerTitle}"
+                            </h6>
+
+                            <p className={`text-xs text-slate-200 leading-relaxed font-sans ${isExpanded ? '' : 'line-clamp-2'}`}>
+                              {p.winnerContent}
+                            </p>
+
+                            {/* Card Footer Actions */}
+                            <div className="pt-2 flex items-center justify-between text-xs border-t border-white/5">
+                              <button
+                                onClick={() =>
+                                  setExpandedArchiveIds((prev) => ({
+                                    ...prev,
+                                    [p.id]: !prev[p.id],
+                                  }))
+                                }
+                                className="text-slate-400 hover:text-white transition-colors cursor-pointer font-medium text-[11px] flex items-center gap-1"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUp className="w-3 h-3" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>Read Full Winning Story</span>
+                                    <ChevronDown className="w-3 h-3" />
+                                  </>
+                                )}
+                              </button>
+
+                              <button
+                                onClick={() => handleListenToArchiveWinner(p)}
+                                className="flex items-center gap-1.5 py-1 px-3 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 hover:text-white text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                                title="Listen with Pub Tale TTS Narrator"
+                              >
+                                <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                                <span>Listen to Winner</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

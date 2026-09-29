@@ -33,6 +33,7 @@ import {
   AppNotification,
   OutrageType,
   DailyBanterPrompt,
+  PubQuizRound,
 } from './types';
 
 import {
@@ -44,6 +45,7 @@ import {
   INITIAL_TASKS,
   INITIAL_FLAGGED,
   INITIAL_DAILY_PROMPTS,
+  INITIAL_PUB_QUIZZES,
 } from './data/initialData';
 
 import { calculateLadTier } from './services/tierService';
@@ -85,8 +87,19 @@ export default function App() {
   const [chapters] = useState<Chapter[]>(INITIAL_CHAPTERS);
 
   const [jokes, setJokes] = useState<Joke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_book_items_v5');
-    return saved ? JSON.parse(saved) : INITIAL_JOKES;
+    const saved = localStorage.getItem('lad_jokes_book_items_v6');
+    if (saved) return JSON.parse(saved);
+    const v5 = localStorage.getItem('lad_jokes_book_items_v5');
+    if (v5) {
+      try {
+        const parsed = JSON.parse(v5);
+        const userAdded = parsed.filter((j: Joke) => !INITIAL_JOKES.some((init) => init.id === j.id));
+        return [...INITIAL_JOKES, ...userAdded];
+      } catch {
+        return INITIAL_JOKES;
+      }
+    }
+    return INITIAL_JOKES;
   });
 
   const [stories, setStories] = useState<CommunityStory[]>(() => {
@@ -99,6 +112,11 @@ export default function App() {
   const [polls, setPolls] = useState<Poll[]>(() => {
     const saved = localStorage.getItem('lad_jokes_polls');
     return saved ? JSON.parse(saved) : INITIAL_POLLS;
+  });
+
+  const [quizzes, setQuizzes] = useState<PubQuizRound[]>(() => {
+    const saved = localStorage.getItem('lad_jokes_pub_quizzes_v1');
+    return saved ? JSON.parse(saved) : INITIAL_PUB_QUIZZES;
   });
 
   const [chatMessages, setChatMessages] = useState<EncryptedMessage[]>([
@@ -166,7 +184,7 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('lad_jokes_book_items_v5', JSON.stringify(jokes));
+    localStorage.setItem('lad_jokes_book_items_v6', JSON.stringify(jokes));
   }, [jokes]);
 
   useEffect(() => {
@@ -176,6 +194,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('lad_jokes_polls', JSON.stringify(polls));
   }, [polls]);
+
+  useEffect(() => {
+    localStorage.setItem('lad_jokes_pub_quizzes_v1', JSON.stringify(quizzes));
+  }, [quizzes]);
 
   // Online / Offline listener
   useEffect(() => {
@@ -401,6 +423,47 @@ export default function App() {
     setPolls((prev) => [newPoll, ...prev]);
   };
 
+  // Handlers for Weekly Pub Quiz
+  const handleSaveQuiz = (newRound: PubQuizRound) => {
+    setQuizzes((prev) => [newRound, ...prev]);
+    triggerPushNotification(
+      '🍻 New Weekly Pub Quiz Live!',
+      `Admin published: "${newRound.title}" (${newRound.weekLabel})`
+    );
+    setNotifications((prev) => [
+      {
+        id: 'notif-' + Date.now(),
+        title: '🍻 New Weekly Pub Quiz Live!',
+        message: `Admin published: "${newRound.title}" (${newRound.weekLabel})`,
+        timestamp: 'Just now',
+        read: false,
+        type: 'poll',
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleShareQuizResult = (title: string, userScore: number, maxScore: number) => {
+    setShareData({
+      isOpen: true,
+      title: '🍻 Weekly Pub Quiz Scorecard',
+      content: `I just scored ${userScore}/${maxScore} on "${title}" in the Lad Jokes Weekly Pub Quiz! Settle your pub trivia standing right now:`,
+      type: 'poll',
+    });
+  };
+
+  const handleAwardKarma = (points: number) => {
+    if (currentUser) {
+      const newKarma = currentUser.karma + points;
+      const { tier: newTier } = calculateLadTier(currentUser.pintsBought, newKarma);
+      setCurrentUser({
+        ...currentUser,
+        karma: newKarma,
+        tier: newTier,
+      });
+    }
+  };
+
   // Handlers for Encrypted Chat
   const handleSendMessage = (msg: EncryptedMessage) => {
     setChatMessages((prev) => [...prev, msg]);
@@ -515,8 +578,13 @@ export default function App() {
         {currentTab === 'polls' && (
           <InteractivePolls
             polls={polls}
+            quizzes={quizzes}
+            currentUser={currentUser}
             onVote={handleVotePoll}
             onCreatePoll={handleCreatePoll}
+            onSaveQuiz={handleSaveQuiz}
+            onAwardKarma={handleAwardKarma}
+            onShareQuizResult={handleShareQuizResult}
             onSharePoll={(poll) =>
               setShareData({
                 isOpen: true,

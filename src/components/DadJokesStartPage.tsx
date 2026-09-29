@@ -29,8 +29,19 @@ export const DadJokesStartPage: React.FC<DadJokesStartPageProps> = ({
   onNavigateToCommunity,
 }) => {
   const [dadJokes, setDadJokes] = useState<DadJoke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_dad_jokes_v1');
-    return saved ? JSON.parse(saved) : INITIAL_DAD_JOKES;
+    const saved = localStorage.getItem('lad_jokes_dad_jokes_v2');
+    if (saved) return JSON.parse(saved);
+    const v1 = localStorage.getItem('lad_jokes_dad_jokes_v1');
+    if (v1) {
+      try {
+        const parsed = JSON.parse(v1);
+        const userAdded = parsed.filter((j: DadJoke) => !INITIAL_DAD_JOKES.some((init) => init.id === j.id));
+        return [...INITIAL_DAD_JOKES, ...userAdded];
+      } catch {
+        return INITIAL_DAD_JOKES;
+      }
+    }
+    return INITIAL_DAD_JOKES;
   });
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -52,7 +63,7 @@ export const DadJokesStartPage: React.FC<DadJokesStartPageProps> = ({
   // Save dad jokes on change
   const saveJokes = (updated: DadJoke[]) => {
     setDadJokes(updated);
-    localStorage.setItem('lad_jokes_dad_jokes_v1', JSON.stringify(updated));
+    localStorage.setItem('lad_jokes_dad_jokes_v2', JSON.stringify(updated));
   };
 
   // Filtered jokes

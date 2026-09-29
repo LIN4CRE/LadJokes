@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
-import { Vote, PlusCircle, CheckCircle2, Clock, Share2, BarChart2, Users } from 'lucide-react';
-import { Poll } from '../types';
+import { Vote, PlusCircle, CheckCircle2, Clock, Share2, BarChart2, Users, Trophy } from 'lucide-react';
+import { Poll, PubQuizRound, UserAccount } from '../types';
 import { playBanterSound } from '../services/syncService';
+import { WeeklyPubQuiz } from './WeeklyPubQuiz';
 
 interface InteractivePollsProps {
   polls: Poll[];
+  quizzes?: PubQuizRound[];
+  currentUser?: UserAccount | null;
   onVote: (pollId: string, optionId: string) => void;
   onCreatePoll: (newPoll: Partial<Poll>) => void;
   onSharePoll: (poll: Poll) => void;
+  onSaveQuiz?: (newRound: PubQuizRound) => void;
+  onAwardKarma?: (points: number) => void;
+  onShareQuizResult?: (title: string, score: number, total: number) => void;
 }
 
 export const InteractivePolls: React.FC<InteractivePollsProps> = ({
   polls,
+  quizzes = [],
+  currentUser = null,
   onVote,
   onCreatePoll,
   onSharePoll,
+  onSaveQuiz = () => {},
+  onAwardKarma,
+  onShareQuizResult,
 }) => {
+  const [subTab, setSubTab] = useState<'polls' | 'quiz'>('polls');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [question, setQuestion] = useState('');
   const [category, setCategory] = useState('Pub Ethics');
@@ -58,31 +70,80 @@ export const InteractivePolls: React.FC<InteractivePollsProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="relative rounded-2xl bg-gradient-to-r from-[#141620] via-[#171a26] to-[#10121a] border border-white/10 p-6 sm:p-8 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2 text-xs text-amber-500 font-mono tracking-wider uppercase font-bold">
-              <Vote className="w-4 h-4 text-amber-500" />
-              <span>Real-Time Lad Debates · Community Consensus</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-display font-extrabold tracking-wide text-white uppercase">
-              INTERACTIVE BANTER POLLS
-            </h2>
-            <p className="text-sm text-slate-300">
-              Settle the most heated pub arguments, stag trip rules, and hangover moral dilemmas. Cast your vote or start your own controversial ballot.
-            </p>
-          </div>
+      {/* Sub-Tab Navigation: Community Polls vs Weekly Pub Quiz */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-3">
+        <button
+          onClick={() => {
+            setSubTab('polls');
+            playBanterSound('pop');
+          }}
+          className={`flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            subTab === 'polls'
+              ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white bg-white/5'
+          }`}
+        >
+          <Vote className="w-4 h-4" />
+          <span>Community Debates & Polls</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-black/20 text-black">
+            {polls.length}
+          </span>
+        </button>
 
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98] cursor-pointer shrink-0"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Launch A Banter Poll</span>
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setSubTab('quiz');
+            playBanterSound('pint');
+          }}
+          className={`flex items-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            subTab === 'quiz'
+              ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white bg-white/5'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>Weekly Pub Quiz</span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+            ROUND LIVE
+          </span>
+        </button>
       </div>
+
+      {subTab === 'quiz' ? (
+        <WeeklyPubQuiz
+          quizzes={quizzes}
+          currentUser={currentUser}
+          onSaveQuiz={onSaveQuiz}
+          onAwardKarma={onAwardKarma}
+          onShareQuizResult={onShareQuizResult}
+        />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="relative rounded-2xl bg-gradient-to-r from-[#141620] via-[#171a26] to-[#10121a] border border-white/10 p-6 sm:p-8 shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+              <div className="space-y-2 max-w-2xl">
+                <div className="flex items-center gap-2 text-xs text-amber-500 font-mono tracking-wider uppercase font-bold">
+                  <Vote className="w-4 h-4 text-amber-500" />
+                  <span>Real-Time Lad Debates · Community Consensus</span>
+                </div>
+                <h2 className="text-3xl sm:text-5xl font-display font-extrabold tracking-wide text-white uppercase">
+                  INTERACTIVE BANTER POLLS
+                </h2>
+                <p className="text-sm text-slate-300">
+                  Settle the most heated pub arguments, stag trip rules, and hangover moral dilemmas. Cast your vote or start your own controversial ballot.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98] cursor-pointer shrink-0"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Launch A Banter Poll</span>
+              </button>
+            </div>
+          </div>
 
       {/* Polls Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -269,6 +330,8 @@ export const InteractivePolls: React.FC<InteractivePollsProps> = ({
             </form>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

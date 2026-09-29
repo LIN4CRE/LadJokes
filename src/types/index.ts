@@ -82,6 +82,14 @@ export interface DailyBanterPrompt {
   expiresIn: string;
   entriesCount: number;
   topEntryId?: string;
+  dayLabel?: string;
+  winnerTitle?: string;
+  winnerAuthor?: string;
+  winnerAuthorTier?: LadTier;
+  winnerAvatar?: string;
+  winnerContent?: string;
+  winnerPints?: number;
+  winnerOutrageScore?: number;
 }
 
 export interface PollOption {
@@ -100,6 +108,30 @@ export interface Poll {
   userVotedOptionId?: string;
   createdAt: string;
   expiresIn: string;
+}
+
+export interface PubQuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctOptionIndex: number;
+  explanation: string;
+  points: number;
+}
+
+export interface PubQuizRound {
+  id: string;
+  title: string;
+  weekLabel: string;
+  category: 'Pop Culture' | 'Crude History' | 'Banter Knowledge' | 'Mixed Tavern';
+  description: string;
+  timePerQuestionSeconds: number;
+  questions: PubQuizQuestion[];
+  participantsCount: number;
+  topScorerName: string;
+  topScore: number;
+  createdAt: string;
+  status: 'active' | 'archived';
 }
 
 export interface EncryptedMessage {
