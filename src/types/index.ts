@@ -1,3 +1,6 @@
+export type JokeCategoryType = 'classic' | 'raunchy' | 'disturbing';
+export type ContentIntensity = 'standard' | 'high' | 'extreme';
+
 export interface Joke {
   id: string;
   title: string;
@@ -8,6 +11,8 @@ export interface Joke {
   outrageScore: number; // 0 to 100
   pintsSpilled: number;
   bookmarked?: boolean;
+  categoryType?: JokeCategoryType;
+  intensity?: ContentIntensity;
 }
 
 export interface Chapter {

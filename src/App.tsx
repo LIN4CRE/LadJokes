@@ -78,7 +78,7 @@ export default function App() {
   const [chapters] = useState<Chapter[]>(INITIAL_CHAPTERS);
 
   const [jokes, setJokes] = useState<Joke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_book_items_v4');
+    const saved = localStorage.getItem('lad_jokes_book_items_v5');
     return saved ? JSON.parse(saved) : INITIAL_JOKES;
   });
 
@@ -159,7 +159,7 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('lad_jokes_book_items_v4', JSON.stringify(jokes));
+    localStorage.setItem('lad_jokes_book_items_v5', JSON.stringify(jokes));
   }, [jokes]);
 
   useEffect(() => {
