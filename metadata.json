@@ -1,0 +1,6 @@
+{
+  "name": "Lad Jokes: Adult Banter Book & Crude Tales Community",
+  "description": "The uncensored book of lad jokes, raunchy humor, outrageous pub anecdotes, anonymous outrage ratings, interactive polls, encrypted banter lounge, and community forums.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
