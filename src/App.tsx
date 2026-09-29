@@ -123,28 +123,17 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_PUB_QUIZZES;
   });
 
-  const [chatMessages, setChatMessages] = useState<EncryptedMessage[]>([
-    {
-      id: 'msg-seed-1',
-      sender: 'Big Trev (Sunday League)',
-      recipient: 'backroom_lounge',
-      isGroup: true,
-      ciphertext: 'U2FsdGVkX1+m4eN4',
-      iv: '4f8a29c1',
-      timestamp: '01:14 AM',
-      plaintextCache: 'Who left their muddy shinguards in the boot of my Ford Mondeo after the match?',
-    },
-    {
-      id: 'msg-seed-2',
-      sender: 'Gazza_The_Bazza',
-      recipient: 'backroom_lounge',
-      isGroup: true,
-      ciphertext: 'U2FsdGVkX1+x89a0',
-      iv: '9b3c41e8',
-      timestamp: '01:18 AM',
-      plaintextCache: 'Not mine mate, I only brought flip flops to the game.',
-    },
-  ]);
+  const [chatMessages, setChatMessages] = useState<EncryptedMessage[]>(() => {
+    const saved = localStorage.getItem('lad_jokes_encrypted_lounge_messages_v2');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  });
 
   const [tasks, setTasks] = useState<AdminTask[]>(INITIAL_TASKS);
   const [flaggedItems, setFlaggedItems] = useState<FlaggedItem[]>(INITIAL_FLAGGED);
@@ -155,20 +144,12 @@ export default function App() {
   // Notifications State
   const [notifications, setNotifications] = useState<AppNotification[]>([
     {
-      id: 'notif-1',
-      title: '🍺 Story Viral Surge Alert!',
-      message: 'Your confession "The Stag Do Passport Swap" just hit 450 pints spilled!',
-      timestamp: '15m ago',
+      id: 'notif-welcome',
+      title: '🍺 Welcome to The Banter Vault',
+      message: 'Your local session is encrypted and ready. All 190+ jokes and pub quizzes are available.',
+      timestamp: 'Just now',
       read: false,
-      type: 'viral',
-    },
-    {
-      id: 'notif-2',
-      title: 'Poll Update: Kebab Ethics',
-      message: 'Over 1,600 lads voted on the 3 AM Uber kebab dilemma.',
-      timestamp: '1h ago',
-      read: true,
-      type: 'poll',
+      type: 'system',
     },
   ]);
 
@@ -202,6 +183,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('lad_jokes_pub_quizzes_v1', JSON.stringify(quizzes));
   }, [quizzes]);
+
+  useEffect(() => {
+    localStorage.setItem('lad_jokes_encrypted_lounge_messages_v2', JSON.stringify(chatMessages));
+  }, [chatMessages]);
 
   // Online / Offline listener
   useEffect(() => {

@@ -71,51 +71,16 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
   const [isDailyPromptEntry, setIsDailyPromptEntry] = useState(false);
 
   // Story comments state
-  const [comments, setComments] = useState<Record<string, Comment[]>>({
-    'story-daily-1': [
-      {
-        id: 'c-d1',
-        storyId: 'story-daily-1',
-        author: 'Gaz_The_Accomplice',
-        authorTier: 'Pub Legend',
-        avatar: '📞',
-        text: 'Can confirm, I gave the performance of my life on that Scottish accent call.',
-        createdAt: '2 hours ago',
-        likes: 38,
-      },
-      {
-        id: 'c-d2',
-        storyId: 'story-daily-1',
-        author: 'PizzaExpressManager',
-        authorTier: 'Banter Veteran',
-        avatar: '🍕',
-        text: 'At least he left £20 on the table for the dough balls! 10/10 escape.',
-        createdAt: '1 hour ago',
-        likes: 21,
-      },
-    ],
-    'story-1': [
-      {
-        id: 'c-1',
-        storyId: 'story-1',
-        author: 'DutchBanterKing',
-        authorTier: 'Pub Legend',
-        avatar: '🚲',
-        text: 'LMAO the brass band playing Sweet Caroline in freezing rain is pure villain behavior!',
-        createdAt: '1 hour ago',
-        likes: 24,
-      },
-      {
-        id: 'c-2',
-        storyId: 'story-1',
-        author: 'StanstedVeteran',
-        authorTier: 'Banter Veteran',
-        avatar: '✈️',
-        text: 'The airport security should have known as soon as they saw the inflatable flamingo.',
-        createdAt: '45 mins ago',
-        likes: 18,
-      },
-    ],
+  const [comments, setComments] = useState<Record<string, Comment[]>>(() => {
+    const saved = localStorage.getItem('lad_jokes_story_comments_v2');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {};
+      }
+    }
+    return {};
   });
   const [newCommentText, setNewCommentText] = useState('');
   const [coachModalConfig, setCoachModalConfig] = useState<{
@@ -266,13 +231,18 @@ export const CommunityForum: React.FC<CommunityForumProps> = ({
       likes: 1,
     };
 
-    setComments((prev) => ({
-      ...prev,
-      [activeStoryForComments.id]: [...(prev[activeStoryForComments.id] || []), commentItem],
-    }));
+    setComments((prev) => {
+      const updated = {
+        ...prev,
+        [activeStoryForComments.id]: [...(prev[activeStoryForComments.id] || []), commentItem],
+      };
+      localStorage.setItem('lad_jokes_story_comments_v2', JSON.stringify(updated));
+      return updated;
+    });
 
     activeStoryForComments.commentsCount += 1;
     setNewCommentText('');
+    playBanterSound('pop');
     playBanterSound('pop');
   };
 
