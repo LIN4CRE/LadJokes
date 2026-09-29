@@ -17,6 +17,7 @@ import {
   Moon,
   Sun,
   Shield,
+  Smile,
 } from 'lucide-react';
 
 import {
@@ -54,6 +55,7 @@ import {
 } from './services/syncService';
 
 import { Navbar } from './components/Navbar';
+import { DadJokesStartPage } from './components/DadJokesStartPage';
 import { BookReader } from './components/BookReader';
 import { CommunityForum } from './components/CommunityForum';
 import { InteractivePolls } from './components/InteractivePolls';
@@ -66,7 +68,7 @@ import { AgeDisclaimerModal } from './components/AgeDisclaimerModal';
 
 export default function App() {
   // Navigation
-  const [currentTab, setCurrentTab] = useState<'book' | 'community' | 'polls' | 'lounge' | 'admin'>('book');
+  const [currentTab, setCurrentTab] = useState<'dadJokes' | 'book' | 'community' | 'polls' | 'lounge' | 'admin'>('dadJokes');
 
   // Network offline state
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -460,6 +462,13 @@ export default function App() {
 
       {/* Main App Content Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-12">
+        {currentTab === 'dadJokes' && (
+          <DadJokesStartPage
+            onNavigateToBook={() => setCurrentTab('book')}
+            onNavigateToCommunity={() => setCurrentTab('community')}
+          />
+        )}
+
         {currentTab === 'book' && (
           <BookReader
             chapters={chapters}
@@ -536,6 +545,19 @@ export default function App() {
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0d12]/95 backdrop-blur-md border-t border-white/10 px-2 py-1.5 flex items-center justify-around">
+        <button
+          onClick={() => {
+            setCurrentTab('dadJokes');
+            playBanterSound('pop');
+          }}
+          className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors cursor-pointer ${
+            currentTab === 'dadJokes' ? 'text-amber-400 font-bold' : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Smile className="w-4 h-4" />
+          <span>Dad Jokes</span>
+        </button>
+
         <button
           onClick={() => {
             setCurrentTab('book');

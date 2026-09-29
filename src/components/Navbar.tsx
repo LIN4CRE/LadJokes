@@ -26,14 +26,27 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Zone 1: Single text element wordmark */}
         <button
-          onClick={() => onNavigate('book')}
+          onClick={() => onNavigate('dadJokes')}
           className="text-2xl font-display font-bold tracking-widest text-amber-500 hover:text-amber-400 transition-colors cursor-pointer select-none"
         >
           LAD JOKES
         </button>
 
         {/* Zone 2: 4-5 clean text navigation links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium">
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <button
+            onClick={() => onNavigate('dadJokes')}
+            className={`transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+              currentTab === 'dadJokes'
+                ? 'text-amber-400 font-semibold'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <span>Dad Jokes</span>
+            <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-amber-500/20 text-amber-300">
+              Start
+            </span>
+          </button>
           <button
             onClick={() => onNavigate('book')}
             className={`transition-colors whitespace-nowrap cursor-pointer ${
@@ -42,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            The Book
+            The Book (18+)
           </button>
           <button
             onClick={() => onNavigate('community')}
