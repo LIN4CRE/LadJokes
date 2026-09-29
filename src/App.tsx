@@ -69,6 +69,7 @@ import { SocialShareModal } from './components/SocialShareModal';
 import { NotificationCenter } from './components/NotificationCenter';
 import { AgeDisclaimerModal } from './components/AgeDisclaimerModal';
 import { BanterCoachModal } from './components/BanterCoachModal';
+import { AboutModal } from './components/AboutModal';
 
 export default function App() {
   // Navigation
@@ -76,6 +77,7 @@ export default function App() {
 
   // AI Banter Coach state
   const [isBanterCoachOpen, setIsBanterCoachOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   // Network offline state
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -525,6 +527,7 @@ export default function App() {
         onOpenNotifications={() => setIsNotifOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenBanterCoach={() => setIsBanterCoachOpen(true)}
+        onOpenAbout={() => setIsAboutOpen(true)}
         user={currentUser}
         isOnline={isOnline}
       />
@@ -616,6 +619,54 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* App Footer */}
+      <footer className="w-full border-t border-white/5 py-8 px-4 sm:px-6 bg-[#07080b] text-slate-400 text-xs">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="font-display font-bold text-base text-amber-500 tracking-wider">
+              LAD JOKES &amp; BANTER VAULT
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300">
+              v2.4.0
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <button
+              onClick={() => setIsAboutOpen(true)}
+              className="text-amber-400 hover:text-amber-300 font-semibold transition-colors cursor-pointer"
+            >
+              📖 About &amp; Manifesto
+            </button>
+            <span className="text-slate-600">·</span>
+            <button
+              onClick={() => setCurrentTab('book')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              The Book (18+)
+            </button>
+            <span className="text-slate-600">·</span>
+            <button
+              onClick={() => setCurrentTab('polls')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Weekly Pub Quiz
+            </button>
+            <span className="text-slate-600">·</span>
+            <button
+              onClick={() => setCurrentTab('lounge')}
+              className="hover:text-white transition-colors cursor-pointer"
+            >
+              Encrypted Lounge
+            </button>
+          </div>
+
+          <div className="text-slate-500 text-[11px] font-mono text-center sm:text-right">
+            <span>© 2026 The Banter Vault · Pure Tavern Banter</span>
+          </div>
+        </div>
+      </footer>
 
       {/* Mobile Bottom Navigation Bar (< 768px) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c0d12]/95 backdrop-blur-md border-t border-white/10 px-2 py-1.5 flex items-center justify-around">
@@ -743,6 +794,14 @@ export default function App() {
       <BanterCoachModal
         isOpen={isBanterCoachOpen}
         onClose={() => setIsBanterCoachOpen(false)}
+      />
+
+      {/* Global About & Manifesto Modal */}
+      <AboutModal
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+        totalJokesCount={jokes.length}
+        totalStoriesCount={stories.length}
       />
     </div>
   );

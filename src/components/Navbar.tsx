@@ -10,6 +10,7 @@ interface NavbarProps {
   onOpenNotifications: () => void;
   onOpenAuth: () => void;
   onOpenBanterCoach?: () => void;
+  onOpenAbout?: () => void;
   user: UserAccount | null;
   isOnline: boolean;
 }
@@ -21,6 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   onOpenAuth,
   onOpenBanterCoach,
+  onOpenAbout,
   user,
 }) => {
   return (
@@ -99,6 +101,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Admin Portal
           </button>
+          {onOpenAbout && (
+            <button
+              onClick={onOpenAbout}
+              className="text-slate-400 hover:text-white transition-colors whitespace-nowrap cursor-pointer"
+            >
+              About
+            </button>
+          )}
         </nav>
 
         {/* Zone 3: 1-2 primary actions */}

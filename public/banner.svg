@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0b10" />
+      <stop offset="45%" stop-color="#151722" />
+      <stop offset="100%" stop-color="#07080c" />
+    </linearGradient>
+
+    <!-- Warm Amber Glow -->
+    <radialGradient id="amberGlow" cx="25%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#d97706" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Emerald / Violet Glow -->
+    <radialGradient id="violetGlow" cx="80%" cy="70%" r="50%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#6d28d9" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Gold Text Gradient -->
+    <linearGradient id="goldText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <!-- Border Glow -->
+    <linearGradient id="borderGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.6" />
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+
+  <!-- Lighting Auras -->
+  <rect width="1200" height="630" fill="url(#amberGlow)" />
+  <rect width="1200" height="630" fill="url(#violetGlow)" />
+
+  <!-- Grid Overlay -->
+  <g stroke="#ffffff" stroke-opacity="0.03" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105" />
+    <line x1="0" y1="210" x2="1200" y2="210" />
+    <line x1="0" y1="315" x2="1200" y2="315" />
+    <line x1="0" y1="420" x2="1200" y2="420" />
+    <line x1="0" y1="525" x2="1200" y2="525" />
+    <line x1="200" y1="0" x2="200" y2="630" />
+    <line x1="400" y1="0" x2="400" y2="630" />
+    <line x1="600" y1="0" x2="600" y2="630" />
+    <line x1="800" y1="0" x2="800" y2="630" />
+    <line x1="1000" y1="0" x2="1000" y2="630" />
+  </g>
+
+  <!-- Outer Card Frame -->
+  <rect x="40" y="40" width="1120" height="550" rx="28" fill="none" stroke="url(#borderGlow)" stroke-width="1.5" />
+
+  <!-- Decorative Badge Top Left -->
+  <g transform="translate(80, 80)">
+    <rect width="210" height="36" rx="18" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-opacity="0.4" stroke-width="1" />
+    <text x="20" y="23" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#fbbf24" letter-spacing="1.5">🍺 100% UNCENSORED VAULT</text>
+  </g>
+
+  <!-- Decorative Badge Top Right -->
+  <g transform="translate(930, 80)">
+    <rect width="190" height="36" rx="18" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-opacity="0.4" stroke-width="1" />
+    <text x="22" y="23" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#c4b5fd" letter-spacing="1">🏆 v2.4.0 VERIFIED</text>
+  </g>
+
+  <!-- Main Hero Title -->
+  <text x="80" y="220" font-family="'Impact', 'Arial Black', sans-serif" font-size="76" font-weight="900" fill="#ffffff" letter-spacing="2">
+    LAD JOKES &amp; TALES
+  </text>
+  <text x="80" y="300" font-family="'Impact', 'Arial Black', sans-serif" font-size="76" font-weight="900" fill="url(#goldText)" letter-spacing="2">
+    THE BANTER VAULT
+  </text>
+
+  <!-- Subtitle Paragraph -->
+  <text x="80" y="360" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="400" fill="#cbd5e1">
+    The definitive digital sanctuary of British &amp; Aussie tavern culture, stag catastrophes,
+  </text>
+  <text x="80" y="392" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="400" fill="#94a3b8">
+    crude confessions, interactive pub quizzes, audio narrations, and Sunday league banter.
+  </text>
+
+  <!-- Feature Tags / Chips -->
+  <g transform="translate(80, 440)">
+    <!-- Tag 1 -->
+    <rect x="0" y="0" width="165" height="42" rx="12" fill="#1e2235" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+    <text x="16" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0">📖 6 Adult Chapters</text>
+
+    <!-- Tag 2 -->
+    <rect x="180" y="0" width="180" height="42" rx="12" fill="#1e2235" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+    <text x="16" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0">🍻 Weekly Pub Quiz</text>
+
+    <!-- Tag 3 -->
+    <rect x="375" y="0" width="175" height="42" rx="12" fill="#1e2235" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+    <text x="16" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0">🎙️ Pub Tale Audio TTS</text>
+
+    <!-- Tag 4 -->
+    <rect x="565" y="0" width="165" height="42" rx="12" fill="#1e2235" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+    <text x="16" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0">⚡ 7-Day Archive</text>
+
+    <!-- Tag 5 -->
+    <rect x="745" y="0" width="165" height="42" rx="12" fill="#1e2235" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1" />
+    <text x="16" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#e2e8f0">🔒 Encrypted Lounge</text>
+  </g>
+
+  <!-- Graphic Icon Illustration on Right Side -->
+  <g transform="translate(940, 200)">
+    <!-- Shield / Pint Graphic Silhouette -->
+    <circle cx="100" cy="100" r="90" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="2" />
+    <circle cx="100" cy="100" r="72" fill="#f59e0b" fill-opacity="0.08" />
+    <text x="60" y="130" font-size="80">🍺</text>
+  </g>
+
+  <!-- Bottom Bar Metadata -->
+  <g transform="translate(80, 525)">
+    <text x="0" y="20" font-family="'JetBrains Mono', monospace" font-size="12" fill="#64748b" letter-spacing="1">
+      REACT 19 · TAILWIND CSS · TYPESCRIPT · GEMINI AI · PWA READY · MIT LICENSE
+    </text>
+  </g>
+</svg>
