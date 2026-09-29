@@ -87,12 +87,12 @@ export default function App() {
   const [chapters] = useState<Chapter[]>(INITIAL_CHAPTERS);
 
   const [jokes, setJokes] = useState<Joke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_book_items_v6');
+    const saved = localStorage.getItem('lad_jokes_book_items_v7');
     if (saved) return JSON.parse(saved);
-    const v5 = localStorage.getItem('lad_jokes_book_items_v5');
-    if (v5) {
+    const v6 = localStorage.getItem('lad_jokes_book_items_v6') || localStorage.getItem('lad_jokes_book_items_v5');
+    if (v6) {
       try {
-        const parsed = JSON.parse(v5);
+        const parsed = JSON.parse(v6);
         const userAdded = parsed.filter((j: Joke) => !INITIAL_JOKES.some((init) => init.id === j.id));
         return [...INITIAL_JOKES, ...userAdded];
       } catch {
@@ -184,7 +184,7 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('lad_jokes_book_items_v6', JSON.stringify(jokes));
+    localStorage.setItem('lad_jokes_book_items_v7', JSON.stringify(jokes));
   }, [jokes]);
 
   useEffect(() => {
