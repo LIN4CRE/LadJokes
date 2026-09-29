@@ -70,6 +70,7 @@ import { NotificationCenter } from './components/NotificationCenter';
 import { AgeDisclaimerModal } from './components/AgeDisclaimerModal';
 import { BanterCoachModal } from './components/BanterCoachModal';
 import { AboutModal } from './components/AboutModal';
+import { BazDeliveryOverlay } from './components/BazDeliveryOverlay';
 
 export default function App() {
   // Navigation
@@ -77,6 +78,7 @@ export default function App() {
 
   // AI Banter Coach state
   const [isBanterCoachOpen, setIsBanterCoachOpen] = useState(false);
+  const [banterCoachContext, setBanterCoachContext] = useState<string>('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
 
   // Network offline state
@@ -89,12 +91,12 @@ export default function App() {
   const [chapters] = useState<Chapter[]>(INITIAL_CHAPTERS);
 
   const [jokes, setJokes] = useState<Joke[]>(() => {
-    const saved = localStorage.getItem('lad_jokes_book_items_v7');
+    const saved = localStorage.getItem('lad_jokes_book_items_v8');
     if (saved) return JSON.parse(saved);
-    const v6 = localStorage.getItem('lad_jokes_book_items_v6') || localStorage.getItem('lad_jokes_book_items_v5');
-    if (v6) {
+    const v7 = localStorage.getItem('lad_jokes_book_items_v7') || localStorage.getItem('lad_jokes_book_items_v6');
+    if (v7) {
       try {
-        const parsed = JSON.parse(v6);
+        const parsed = JSON.parse(v7);
         const userAdded = parsed.filter((j: Joke) => !INITIAL_JOKES.some((init) => init.id === j.id));
         return [...INITIAL_JOKES, ...userAdded];
       } catch {
@@ -186,7 +188,7 @@ export default function App() {
 
   // Sync to LocalStorage
   useEffect(() => {
-    localStorage.setItem('lad_jokes_book_items_v7', JSON.stringify(jokes));
+    localStorage.setItem('lad_jokes_book_items_v8', JSON.stringify(jokes));
   }, [jokes]);
 
   useEffect(() => {
@@ -538,6 +540,10 @@ export default function App() {
           <DadJokesStartPage
             onNavigateToBook={() => setCurrentTab('book')}
             onNavigateToCommunity={() => setCurrentTab('community')}
+            onOpenBanterCoach={(ctx) => {
+              setBanterCoachContext(ctx || '');
+              setIsBanterCoachOpen(true);
+            }}
           />
         )}
 
@@ -793,7 +799,11 @@ export default function App() {
       {/* Global Banter Coach Modal */}
       <BanterCoachModal
         isOpen={isBanterCoachOpen}
-        onClose={() => setIsBanterCoachOpen(false)}
+        initialContext={banterCoachContext}
+        onClose={() => {
+          setIsBanterCoachOpen(false);
+          setBanterCoachContext('');
+        }}
       />
 
       {/* Global About & Manifesto Modal */}
@@ -803,6 +813,9 @@ export default function App() {
         totalJokesCount={jokes.length}
         totalStoriesCount={stories.length}
       />
+
+      {/* Baz Animated Live Delivery Overlay */}
+      <BazDeliveryOverlay />
     </div>
   );
 }

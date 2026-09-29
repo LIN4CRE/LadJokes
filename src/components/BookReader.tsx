@@ -25,6 +25,7 @@ import {
 import { Chapter, Joke, JokeCategoryType, ContentIntensity } from '../types';
 import { playBanterSound } from '../services/syncService';
 import { BanterCoachModal } from './BanterCoachModal';
+import { bazSpeech } from '../services/bazSpeechEngine';
 
 interface BookReaderProps {
   chapters: Chapter[];
@@ -523,7 +524,22 @@ export const BookReader: React.FC<BookReaderProps> = ({
               {/* Punchline Card with Reveal Option */}
               <div className="mt-6 p-6 rounded-xl bg-gradient-to-br from-amber-500/10 via-[#181a24] to-[#12141c] border border-amber-500/30 relative">
                 <div className="flex items-center justify-between text-xs font-mono text-amber-400 font-bold uppercase mb-2">
-                  <span>The Punchline</span>
+                  <div className="flex items-center gap-2">
+                    <span>The Punchline</span>
+                    <button
+                      onClick={() => {
+                        setShowPunchline(true);
+                        playBanterSound('pint');
+                        bazSpeech.deliverJoke(activeJoke.title + '. ' + activeJoke.content, activeJoke.punchline);
+                      }}
+                      className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[11px] font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                      title="Deliver this joke with Baz animated voice & comedy timing"
+                    >
+                      <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Deliver with Baz</span>
+                    </button>
+                  </div>
+
                   <button
                     onClick={() => setShowPunchline(!showPunchline)}
                     className="text-slate-400 hover:text-white text-[11px] underline cursor-pointer"
